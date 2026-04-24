@@ -1,6 +1,15 @@
 pipeline {
   agent any
 
+  options {
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+  }
+
+  environment {
+    IMAGE_NAME = 'ecv-devops-app'
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -28,7 +37,16 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh 'docker build -t ecv-devops-app .'
+        sh 'docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .'
+        sh 'docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest'
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        sh 'docker stop ${IMAGE_NAME} || true'
+        sh 'docker rm ${IMAGE_NAME} || true'
+        sh 'docker run -d -p 3000:3000 --name ${IMAGE_NAME} ${IMAGE_NAME}:latest'
       }
     }
   }
