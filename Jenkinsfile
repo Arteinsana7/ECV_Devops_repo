@@ -1,4 +1,3 @@
-
 pipeline {
   agent any
 
@@ -10,38 +9,26 @@ pipeline {
     }
 
     stage('Install') {
-      agent {
-        docker {
-          image 'node:18-alpine'
-          reuseNode true
-        }
-      }
       steps {
         sh 'npm ci'
       }
     }
 
     stage('Lint') {
-      agent {
-        docker {
-          image 'node:18-alpine'
-          reuseNode true
-        }
-      }
       steps {
         sh 'npm run lint'
       }
     }
 
     stage('Tests') {
-      agent {
-        docker {
-          image 'node:18-alpine'
-          reuseNode true
-        }
-      }
       steps {
         sh 'npm run test:coverage'
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        sh 'docker build -t ecv-devops-app .'
       }
     }
   }
